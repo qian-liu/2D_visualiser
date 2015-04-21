@@ -11,7 +11,7 @@
 #include "utilities/DatabaseReader.h"
 #include "utilities/ColourReader.h"
 #include "utilities/DatabaseMessageConnection.h"
-//#include "raster_view/RasterPlot.h"
+#include "raster_view/RasterPlot.h"
 #include "twoD_view/TwoDPlot.h"
 
 char* get_next_arg(int position, char **argv, int argc){
@@ -147,7 +147,7 @@ int main(int argc, char **argv){
     delete database;
 
     // Create the visualiser
-/*    RasterPlot plotter(
+    /*RasterPlot plotter(
         argc, argv, remote_host, ports_to_listen_to, y_axis_labels,
         key_to_neuronid_map, neuron_id_to_colour_map, run_time,
         machine_time_step, base_neuron_id, database_message_connection);*/

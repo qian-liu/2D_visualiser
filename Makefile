@@ -13,7 +13,7 @@ OBJECTS = utilities/ColourReader.o \
 OBJS=$(OBJECTS:%=build/%)
 
 vis: $(OBJS)
-	g++ -o $@ $^ -lGL -lGLU -lglut -lpthread -lsqlite3
+	g++ -o $@ $^ -lGL -lGLU -lglut -lSOIL -lm -lpthread -lsqlite3
 
 build/%.o: %.cpp
 	-mkdir -p $(dir $@)

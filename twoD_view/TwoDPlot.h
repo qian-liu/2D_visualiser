@@ -33,17 +33,24 @@ private:
 
     const static int WINDOW_BORDER = 110;
     const static int INIT_WINDOW_WIDTH = 800;
-    const static int INIT_WINDOW_HEIGHT = 600;
+    const static int INIT_WINDOW_HEIGHT = 800;
     const static double FRAMES_PER_SECOND = 60.0;
     const static int INIT_WINDOW_X = 100;
     const static int INIT_WINDOW_Y = 100;
-
+    const static int SIZE_WIDTH = 128;
+    const static int SIZE_HEIGHT = 128;
+    
     float plot_time_ms;
     float timestep_ms;
     int n_neurons;
     int window_width;
     int window_height;
-
+    unsigned char img[SIZE_WIDTH*SIZE_HEIGHT*3];
+    int population_width;
+    int population_height;
+    
+    int count;
+    
     std::deque<std::pair<int, int> > points_to_draw;
     pthread_mutex_t point_mutex;
 

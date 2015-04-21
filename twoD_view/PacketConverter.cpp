@@ -31,6 +31,7 @@ void PacketConverter::InternalThreadEntry(){
 
         // add points to the point queue
         pthread_mutex_lock(this->point_mutex);
+        
         for(list<pair<int, int> >::iterator iter = data.begin();
                 iter != data.end(); ++iter) {
             this->points_to_plot->push_back(*iter);
