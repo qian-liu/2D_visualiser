@@ -2,8 +2,7 @@
 #include <GL/glut.h>
 #include <GL/freeglut.h>
 #include <math.h>
-//#include <stdio.h>
-#include <iostream>     // for console output
+#include <iostream> 
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -86,7 +85,9 @@ TwoDPlot::TwoDPlot(int argc, char **argv, char *remote_host,
     this->n_neurons = n_neurons;
     this->database_message_connection = database_message_connection;
     
-    this->count = 0;
+    float min_size = window_height < window_width ? window_height: window_width;
+    float max_length = population_height > population_width ? population_height: population_width; 
+    this->block_size = (float) (min_size - (2 * WINDOW_BORDER))/max_length;
 
     fprintf(stderr, "n_neurons = %i\n", this->n_neurons);
     fprintf(stderr, "plot time = %f\n", this->plot_time_ms);
@@ -114,9 +115,7 @@ TwoDPlot::TwoDPlot(int argc, char **argv, char *remote_host,
 }
 
 void TwoDPlot::init() {
-    //glClearColor(0.0, 0.0, 0.0, 1.0);
-    //glColor3f(1.0, 1.0, 1.0);
-    //glShadeModel(GL_SMOOTH);
+    // setup environment
 
     glEnable(GL_TEXTURE_2D);
     GLuint texture_id;
@@ -124,6 +123,8 @@ void TwoDPlot::init() {
     glBindTexture(GL_TEXTURE_2D, texture_id);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    
+    
     for (int i=0; i<population_width * population_height * 3; i++)
         img[i] = 0; 
 
@@ -181,143 +182,156 @@ void TwoDPlot::printglstroke(float x, float y, float size, float rotate,
     glPopMatrix();
 }
 
+void TwoDPlot::accumSpikes(){
+    deque<pair<int, int> >::iterator iter;
+    int neuronID = 0;
+    int pixel_x = 0;
+    int pixel_y = 0;
+    int increase = 255;
+    while (!points_to_draw.empty())
+    {
+        iter = points_to_draw.begin();
+        neuronID = iter->second;
+        //std::cout << "call the first:" << neuronID << "\n";
+        points_to_draw.pop_front();
+        pixel_x = neuronID / population_width;
+        pixel_y = population_width - 1 - neuronID % population_width;
+        neuronID = pixel_x * population_width + pixel_y;
+        img[neuronID * 3] += increase;
+    }
+}
+
+void TwoDPlot::drawGrid(){
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glPushMatrix();
+    glTranslatef((window_width - population_height*block_size)/2, WINDOW_BORDER, 0);
+    glBegin(GL_LINES);
+    for(int row = 0; row <= population_width; row++){
+        glVertex2f(0.0f, row*block_size);
+        glVertex2f(population_height*block_size, row*block_size);
+    }
+
+    for(int col = 0; col <= population_height; col++){
+        glVertex2f(col*block_size, 0.0f);
+        glVertex2f(col*block_size, population_width*block_size);
+    }
+    glEnd();
+    glPopMatrix();
+}
+
+void TwoDPlot::drawSquare(float x, float y, 
+                          float r, float g, float b){
+    glColor3f(r, g, b);
+    glPushMatrix();
+    //glTranslatef((y - population_height)*block_size, (population_width - x)*block_size, 0.0f);
+    glTranslatef((x)*block_size, (y)*block_size, 0.0f);
+    glBegin(GL_TRIANGLES);
+/*
+      glVertex2f(x - half_size, y - half_size);
+      glVertex2f(x + half_size, y + half_size);
+      glVertex2f(x - half_size, y + half_size);
+      
+      glVertex2f(x - half_size, y - half_size);
+      glVertex2f(x + half_size, y - half_size);
+      glVertex2f(x + half_size, y + half_size);
+*/
+//*
+      glVertex2f(x, y);
+      glVertex2f(x + block_size, y + block_size);
+      glVertex2f(x, y + block_size);
+      
+      glVertex2f(x , y);
+      glVertex2f(x + block_size, y );
+      glVertex2f(x + block_size, y + block_size);
+/*
+      glVertex2f(y, x);
+      glVertex2f(y - block_size, x - block_size);
+      glVertex2f(y, x - block_size);
+      
+      glVertex2f(y , x);
+      glVertex2f(y - block_size, x );
+      glVertex2f(y - block_size, x - block_size);
+*/
+    glEnd();
+    
+    glPopMatrix();
+}
+
+void TwoDPlot::textureDisplay(){
+    char title[] = "2D Plot";
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    printgl((window_width / 2) - 75, window_height - 50,
+        GLUT_BITMAP_TIMES_ROMAN_24, title);
+    
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, population_width, population_height, 0, GL_RGB, GL_UNSIGNED_BYTE, img);
+    glEnable(GL_TEXTURE_2D);
+    glBegin(GL_QUADS);
+    
+    float height = (float) (window_height - (2 * WINDOW_BORDER));
+    float width = (float) (window_width - (2 * WINDOW_BORDER));
+    //printf("\nwindow_width: %d\nwindow_height: %d\ndisplay_width: %f\ndisplay_height: %f\nWINDOW_BORDER: %d\n", window_width, window_height, width, height, WINDOW_BORDER);
+    glTexCoord2f (0.0, 0.0);
+    glVertex3f (WINDOW_BORDER, height, 0.0);
+    glTexCoord2f (1.0, 0.0);
+        
+    glVertex3f (width, height, 0.0);
+    glTexCoord2f (1.0, 1.0);
+    glVertex3f (width, WINDOW_BORDER, 0.0);
+    glTexCoord2f (0.0, 1.0);
+      
+    glVertex3f (WINDOW_BORDER, WINDOW_BORDER, 0.0);
+    glEnd();
+    glutSwapBuffers();
+        
+    //std::cout << now_str() << '\n';   
+}
+
+void TwoDPlot::polygonDisplay(){
+    float coords[2];
+    char title[] = "2D Plot";
+    
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    printgl((window_width / 2) - 75, window_height - 50,
+            GLUT_BITMAP_TIMES_ROMAN_24, title);
+
+    glPushMatrix();
+    int pixel_x =0, pixel_y=0, neuronID=0;
+    float red =0, green =0, blue =0;
+    glTranslatef((window_width - population_width*block_size)/2 - WINDOW_BORDER, WINDOW_BORDER, 0);
+    for (pixel_x = 0; pixel_x < population_height; pixel_x++)
+    {
+        for (pixel_y = 0; pixel_y < population_width; pixel_y++)
+        {
+            neuronID = pixel_x * population_width + pixel_y;
+            red = float(img[neuronID*3 ]);
+            green = float(img[neuronID*3 +1]);
+            blue = float(img[neuronID* 3+2]);
+            //turn 90 degree
+            drawSquare(pixel_y, population_width - pixel_x, red, green, blue);
+            if (red != 0)
+                std::cout << "neuronID: " << neuronID << ", spike times: "<< red << "\n";
+        }
+    }
+    
+    glPopMatrix();
+
+    drawGrid();
+    glutSwapBuffers();
+}
+
+
+
 void TwoDPlot::display(float time) {
     if (glutGetWindow() == this->window) {
-        glClearColor(1.0, 1.0, 1.0, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT);    
-        /*glPointSize(1.0);
-        float x_spacing = (float) (window_width - (2 * WINDOW_BORDER))
-                / ((float) plot_time_ms / timestep_ms);
-        float y_spacing = (float) (window_height - (2 * WINDOW_BORDER))
-                / (float) n_neurons;
-        glClearColor(1.0, 1.0, 1.0, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        glColor4f(0.0, 0.0, 0.0, 1.0);
-
-        char title[] = "2D Plot";
-        printgl((window_width / 2) - 75, window_height - 50,
-                GLUT_BITMAP_TIMES_ROMAN_24, title);
-
-        char x_axis[] = "Simulation Time (ms)";
-        printglstroke((window_width / 2) - 100, 20, 0.12, 0, x_axis);
-        char label_0[] = "0";
-        printglstroke(WINDOW_BORDER - 15, WINDOW_BORDER - 20, 0.10, 0, label_0);
-        char label_max[] = "%.1f";
-        printglstroke(window_width - WINDOW_BORDER - 20, WINDOW_BORDER - 20,
-                0.10, 0, label_max, plot_time_ms);
-
-        for (map<int, char*>::iterator iter = y_axis_labels->begin();
-                iter != y_axis_labels->end(); ++iter) {
-            float y_value = ((iter->first * y_spacing) + WINDOW_BORDER) - 10;
-            float width =
-                    glutStrokeLength(GLUT_STROKE_ROMAN,
-                                    reinterpret_cast<const unsigned char*>
-                                     (iter->second))
-                    * 0.1;
-            char y_label[] = "%s";
-            printglstroke((WINDOW_BORDER - width) - 20, y_value, 0.10, 0,
-                    iter->second);
-        }
-
-        glColor4f(0.0, 0.0, 0.0, 1.0);
-        glLineWidth(1.0);
-        glBegin (GL_LINES);
-        glVertex2f(window_width - WINDOW_BORDER, WINDOW_BORDER);
-        glVertex2f(WINDOW_BORDER - 10, WINDOW_BORDER);
-        glEnd();
-        glBegin(GL_LINES);
-        glVertex2f(WINDOW_BORDER - 10, WINDOW_BORDER);
-        glVertex2f(WINDOW_BORDER - 10, window_height - WINDOW_BORDER);
-        glEnd();
-
-        glPointSize(2.0);
-        glBegin(GL_POINTS);
-        pthread_mutex_lock(&(this->point_mutex));
-        for (deque<pair<int, int> >::iterator iter =
-                points_to_draw.begin(); iter != points_to_draw.end(); ++iter) {
-
-            if (neuron_id_to_colour_map->find(iter->second)
-                    == neuron_id_to_colour_map->end()) {
-                fprintf(stderr, "Missing colour for neuron %d\n", iter->second);
-                continue;
-            }
-            struct colour colour = (*neuron_id_to_colour_map)[iter->second];
-
-            glColor4f(colour.r, colour.g, colour.b, 1.0);
-            float x_value = (iter->first * x_spacing) + WINDOW_BORDER;
-            float y_value = (iter->second * y_spacing) + WINDOW_BORDER;
-
-            glVertex2f(x_value, y_value);
-        }
-        pthread_mutex_unlock(&(this->point_mutex));
-        glEnd();*/
-
-
-        
-        
-        /*img = SOIL_load_image("lena_256.jpg", &img_width, &img_height, NULL, 0);
-        
-        for (int i=0;i<img_width*img_height;i++)
-        {
-            printf("%d: %d_%d_%d, \n", i, *(this->img + i*3), *(this->img + i*3 + 1), *(this->img + i*3 + 2) );
-        }
-        printf("%d: %d_%d_%d, \n", i, *(this->img + i*3), *(this->img + i*3 + 1), *(this->img + i*3 + 2) );*/
-        //cout << now_str() << '\n';   
-        
-        //for (int i=0; i<population_width * population_height * 3; i++)
-        //    img[i] = 0; 
-        deque<pair<int, int> >::iterator iter;
-        int neuronID = 0;
-        int pixel_x = 0;
-        int pixel_y = 0;
-        int increase = 255;
-        while (!points_to_draw.empty())
-        {
-            iter = points_to_draw.begin();
-            neuronID = iter->second;
-            std::cout << "call the first:" << neuronID << "\n";
-            points_to_draw.pop_front();
-            pixel_x = neuronID / population_width;
-            pixel_y = population_width - 1 - neuronID % population_width;
-            neuronID = pixel_x * population_width + pixel_y;
-            img[neuronID * 3] += increase;
-            //img[count * 3] += increase;
-            //count++;
-        }
-        
-        /*int offset = count * population_width * 3;
-        for (int i=0; i<population_width; i++)
-        {
-            img[offset + i*3] = 255;
-            img[offset + i*3 + 1] = 255;
-            img[offset + i*3 + 2] = 255;
-        }*/
-        
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, population_width, population_height, 0, GL_RGB, GL_UNSIGNED_BYTE, img);
-
-        glEnable(GL_TEXTURE_2D);
-        glBegin(GL_QUADS);
-        
-        float height = (float) (window_height - (2 * WINDOW_BORDER));
-        float width = (float) (window_width - (2 * WINDOW_BORDER));
-        //printf("\nwindow_width: %d\nwindow_height: %d\ndisplay_width: %f\ndisplay_height: %f\nWINDOW_BORDER: %d\n", window_width, window_height, width, height, WINDOW_BORDER);
-        glTexCoord2f (0.0, 0.0);
-        glVertex3f (WINDOW_BORDER, height, 0.0);
-        glTexCoord2f (1.0, 0.0);
-        
-        glVertex3f (width, height, 0.0);
-        glTexCoord2f (1.0, 1.0);
-        glVertex3f (width, WINDOW_BORDER, 0.0);
-        glTexCoord2f (0.0, 1.0);
-        
-        glVertex3f (WINDOW_BORDER, WINDOW_BORDER, 0.0);
-        glEnd();
-        
-        glutSwapBuffers();
-        
-        
-        //std::cout << now_str() << '\n';    
+        accumSpikes();
+        //textureDisplay();       
+        polygonDisplay(); 
     }
 }
 
@@ -350,6 +364,9 @@ void TwoDPlot::keyboardUp(unsigned char key, int x, int y) {
             database_message_connection->send_ready_notification();
             database_message_connection->close_connection();
         }
+    }
+    if ((int) key == 27) {
+        safelyshut();
     }
 }
 

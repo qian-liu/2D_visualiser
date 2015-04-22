@@ -77,7 +77,7 @@ int main(int argc, char **argv){
         database_message_connection = new DatabaseMessageConnection(
             hand_shake_listen_port_no);
         printf("awaiting tool chain hand shake to say database is ready \n");
-        //packet_file_path = database_message_connection->recieve_notification();
+        packet_file_path = database_message_connection->recieve_notification();
         printf("received tool chain hand shake to say database is ready \n");
     }
 
@@ -147,14 +147,14 @@ int main(int argc, char **argv){
     delete database;
 
     // Create the visualiser
-    RasterPlot plotter(
-        argc, argv, remote_host, ports_to_listen_to, y_axis_labels,
-        key_to_neuronid_map, neuron_id_to_colour_map, run_time,
-        machine_time_step, base_neuron_id, database_message_connection);
-    
-    /*TwoDPlot plotter(
+    /*RasterPlot plotter(
         argc, argv, remote_host, ports_to_listen_to, y_axis_labels,
         key_to_neuronid_map, neuron_id_to_colour_map, run_time,
         machine_time_step, base_neuron_id, database_message_connection);*/
+    
+    TwoDPlot plotter(
+        argc, argv, remote_host, ports_to_listen_to, y_axis_labels,
+        key_to_neuronid_map, neuron_id_to_colour_map, run_time,
+        machine_time_step, base_neuron_id, database_message_connection);
     return 0;
 }

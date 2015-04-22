@@ -30,7 +30,12 @@ private:
     void printglstroke(float x, float y, float size, float rotate,
         char* format, ...);
     void safelyshut();
-
+    void accumSpikes();
+    void textureDisplay();
+    void polygonDisplay();
+    void drawGrid();
+    void drawSquare(float x, float y, float r, float g, float b);
+    
     const static int WINDOW_BORDER = 110;
     const static int INIT_WINDOW_WIDTH = 800;
     const static int INIT_WINDOW_HEIGHT = 800;
@@ -48,8 +53,7 @@ private:
     unsigned char img[SIZE_WIDTH*SIZE_HEIGHT*3];
     int population_width;
     int population_height;
-    
-    int count;
+    int block_size;
     
     std::deque<std::pair<int, int> > points_to_draw;
     pthread_mutex_t point_mutex;
