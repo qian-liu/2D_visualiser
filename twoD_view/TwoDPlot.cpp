@@ -188,6 +188,10 @@ void TwoDPlot::accumSpikes(){
     int pixel_x = 0;
     int pixel_y = 0;
     int increase = 255;
+    
+    for (int i=0; i<population_width * population_height * 3; i++)
+        img[i] = 0; 
+        
     while (!points_to_draw.empty())
     {
         iter = points_to_draw.begin();
@@ -197,14 +201,14 @@ void TwoDPlot::accumSpikes(){
         pixel_x = neuronID / population_width;
         pixel_y = population_width - 1 - neuronID % population_width;
         neuronID = pixel_x * population_width + pixel_y;
-        img[neuronID * 3] += increase;
+        img[neuronID * 3] = increase;
+        //img[neuronID * 3] += increase;
     }
 }
 
 void TwoDPlot::drawGrid(){
     glColor3f(1.0f, 1.0f, 1.0f);
-    glPushMatrix();
-    glTranslatef((window_width - population_height*block_size)/2, WINDOW_BORDER, 0);
+
     glBegin(GL_LINES);
     for(int row = 0; row <= population_width; row++){
         glVertex2f(0.0f, row*block_size);
@@ -216,7 +220,6 @@ void TwoDPlot::drawGrid(){
         glVertex2f(col*block_size, population_width*block_size);
     }
     glEnd();
-    glPopMatrix();
 }
 
 void TwoDPlot::drawSquare(float x, float y, 
@@ -320,7 +323,7 @@ void TwoDPlot::polygonDisplay(){
                 std::cout << "neuronID: " << neuronID << ", spike times: "<< red << "\n";
         }
     }
-    drawGrid();
+    //drawGrid();
     glPopMatrix();
 
     
@@ -331,8 +334,8 @@ void TwoDPlot::polygonDisplay(){
 void TwoDPlot::display(float time) {
     if (glutGetWindow() == this->window) {
         accumSpikes();
-        textureDisplay();       
-        //polygonDisplay(); 
+        //textureDisplay();       
+        polygonDisplay(); 
     }
 }
 

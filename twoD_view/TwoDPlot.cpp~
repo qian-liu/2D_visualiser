@@ -188,6 +188,10 @@ void TwoDPlot::accumSpikes(){
     int pixel_x = 0;
     int pixel_y = 0;
     int increase = 255;
+    
+    for (int i=0; i<population_width * population_height * 3; i++)
+        img[i] = 0; 
+        
     while (!points_to_draw.empty())
     {
         iter = points_to_draw.begin();
@@ -198,13 +202,13 @@ void TwoDPlot::accumSpikes(){
         pixel_y = population_width - 1 - neuronID % population_width;
         neuronID = pixel_x * population_width + pixel_y;
         img[neuronID * 3] += increase;
+        //img[neuronID * 3] += increase;
     }
 }
 
 void TwoDPlot::drawGrid(){
     glColor3f(1.0f, 1.0f, 1.0f);
-    glPushMatrix();
-    glTranslatef((window_width - population_height*block_size)/2, WINDOW_BORDER, 0);
+
     glBegin(GL_LINES);
     for(int row = 0; row <= population_width; row++){
         glVertex2f(0.0f, row*block_size);
@@ -216,7 +220,6 @@ void TwoDPlot::drawGrid(){
         glVertex2f(col*block_size, population_width*block_size);
     }
     glEnd();
-    glPopMatrix();
 }
 
 void TwoDPlot::drawSquare(float x, float y, 
@@ -304,13 +307,8 @@ void TwoDPlot::polygonDisplay(){
 
     glPushMatrix();
     int pixel_x =0, pixel_y=0, neuronID=0;
-<<<<<<< HEAD
-    float red =0, green =0, blue =0;
-    glTranslatef( WINDOW_BORDER, WINDOW_BORDER, 0);
-=======
     GLuint red =0, green =0, blue =0;
     glTranslatef((window_width - population_width*block_size)/2, WINDOW_BORDER, 0);
->>>>>>> 4ad56210f87414856009147e6977f108fed3fc7c
     for (pixel_x = 0; pixel_x < population_height; pixel_x++)
     {
         for (pixel_y = 0; pixel_y < population_width; pixel_y++)
@@ -325,7 +323,7 @@ void TwoDPlot::polygonDisplay(){
                 std::cout << "neuronID: " << neuronID << ", spike times: "<< red << "\n";
         }
     }
-    drawGrid();
+    //drawGrid();
     glPopMatrix();
 
     
@@ -336,8 +334,8 @@ void TwoDPlot::polygonDisplay(){
 void TwoDPlot::display(float time) {
     if (glutGetWindow() == this->window) {
         accumSpikes();
-        textureDisplay();       
-        //polygonDisplay(); 
+        //textureDisplay();       
+        polygonDisplay(); 
     }
 }
 
