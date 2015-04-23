@@ -203,8 +203,6 @@ void TwoDPlot::accumSpikes(){
 
 void TwoDPlot::drawGrid(){
     glColor3f(1.0f, 1.0f, 1.0f);
-    glPushMatrix();
-    glTranslatef((window_width - population_height*block_size)/2, WINDOW_BORDER, 0);
     glBegin(GL_LINES);
     for(int row = 0; row <= population_width; row++){
         glVertex2f(0.0f, row*block_size);
@@ -216,7 +214,7 @@ void TwoDPlot::drawGrid(){
         glVertex2f(col*block_size, population_width*block_size);
     }
     glEnd();
-    glPopMatrix();
+
 }
 
 void TwoDPlot::drawSquare(float x, float y, 
