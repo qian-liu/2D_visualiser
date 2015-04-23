@@ -203,8 +203,6 @@ void TwoDPlot::accumSpikes(){
 
 void TwoDPlot::drawGrid(){
     glColor3f(1.0f, 1.0f, 1.0f);
-    glPushMatrix();
-    glTranslatef((window_width - population_height*block_size)/2, WINDOW_BORDER, 0);
     glBegin(GL_LINES);
     for(int row = 0; row <= population_width; row++){
         glVertex2f(0.0f, row*block_size);
@@ -216,15 +214,15 @@ void TwoDPlot::drawGrid(){
         glVertex2f(col*block_size, population_width*block_size);
     }
     glEnd();
-    glPopMatrix();
+
 }
 
 void TwoDPlot::drawSquare(float x, float y, 
-                          float r, float g, float b){
-    glColor3f(r, g, b);
+                          GLuint r, GLuint g, GLuint b){
+    glColor3ub(r, g, b);
     glPushMatrix();
     //glTranslatef((y - population_height)*block_size, (population_width - x)*block_size, 0.0f);
-    glTranslatef((x)*block_size, (y)*block_size, 0.0f);
+    //glTranslatef((x)*block_size, (y)*block_size, 0.0f);
     glBegin(GL_TRIANGLES);
 /*
       glVertex2f(x - half_size, y - half_size);
@@ -236,13 +234,13 @@ void TwoDPlot::drawSquare(float x, float y,
       glVertex2f(x + half_size, y + half_size);
 */
 //*
-      glVertex2f(x, y);
-      glVertex2f(x + block_size, y + block_size);
-      glVertex2f(x, y + block_size);
+      glVertex2f(x*block_size, y*block_size);
+      glVertex2f((x + 1)*block_size, (y + 1)*block_size);
+      glVertex2f(x*block_size, (y + 1)*block_size);
       
-      glVertex2f(x , y);
-      glVertex2f(x + block_size, y );
-      glVertex2f(x + block_size, y + block_size);
+      glVertex2f(x*block_size , y*block_size);
+      glVertex2f((x + 1)*block_size, y*block_size );
+      glVertex2f((x + 1)*block_size, (y + 1)*block_size);
 /*
       glVertex2f(y, x);
       glVertex2f(y - block_size, x - block_size);
@@ -256,6 +254,7 @@ void TwoDPlot::drawSquare(float x, float y,
     
     glPopMatrix();
 }
+
 
 void TwoDPlot::textureDisplay(){
     char title[] = "2D Plot";
@@ -289,6 +288,7 @@ void TwoDPlot::textureDisplay(){
     //std::cout << now_str() << '\n';   
 }
 
+
 void TwoDPlot::polygonDisplay(){
     float coords[2];
     char title[] = "2D Plot";
@@ -302,29 +302,28 @@ void TwoDPlot::polygonDisplay(){
 
     glPushMatrix();
     int pixel_x =0, pixel_y=0, neuronID=0;
-    float red =0, green =0, blue =0;
-    glTranslatef((window_width - population_width*block_size)/2 - WINDOW_BORDER, WINDOW_BORDER, 0);
+    GLuint red =0, green =0, blue =0;
+    glTranslatef((window_width - population_width*block_size)/2, WINDOW_BORDER, 0);
     for (pixel_x = 0; pixel_x < population_height; pixel_x++)
     {
         for (pixel_y = 0; pixel_y < population_width; pixel_y++)
         {
             neuronID = pixel_x * population_width + pixel_y;
-            red = float(img[neuronID*3 ]);
-            green = float(img[neuronID*3 +1]);
-            blue = float(img[neuronID* 3+2]);
+            red = img[neuronID*3 ];
+            green = img[neuronID*3 +1];
+            blue = img[neuronID* 3+2];
             //turn 90 degree
             drawSquare(pixel_y, population_width - pixel_x, red, green, blue);
             if (red != 0)
                 std::cout << "neuronID: " << neuronID << ", spike times: "<< red << "\n";
         }
     }
-    
+    drawGrid();
     glPopMatrix();
 
-    drawGrid();
+    
     glutSwapBuffers();
 }
-
 
 
 void TwoDPlot::display(float time) {
