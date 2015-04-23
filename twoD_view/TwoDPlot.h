@@ -34,7 +34,7 @@ private:
     void textureDisplay();
     void polygonDisplay();
     void drawGrid();
-    void drawSquare(float x, float y, float r, float g, float b);
+    void drawSquare(float x, float y, GLuint r, GLuint g, GLuint b);
     
     const static int WINDOW_BORDER = 110;
     const static int INIT_WINDOW_WIDTH = 800;
