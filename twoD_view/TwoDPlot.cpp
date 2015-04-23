@@ -303,7 +303,7 @@ void TwoDPlot::polygonDisplay(){
     glPushMatrix();
     int pixel_x =0, pixel_y=0, neuronID=0;
     float red =0, green =0, blue =0;
-    glTranslatef((window_width - population_width*block_size)/2 - WINDOW_BORDER, WINDOW_BORDER, 0);
+    glTranslatef( WINDOW_BORDER, WINDOW_BORDER, 0);
     for (pixel_x = 0; pixel_x < population_height; pixel_x++)
     {
         for (pixel_y = 0; pixel_y < population_width; pixel_y++)
@@ -330,8 +330,8 @@ void TwoDPlot::polygonDisplay(){
 void TwoDPlot::display(float time) {
     if (glutGetWindow() == this->window) {
         accumSpikes();
-        //textureDisplay();       
-        polygonDisplay(); 
+        textureDisplay();       
+        //polygonDisplay(); 
     }
 }
 

@@ -77,7 +77,7 @@ int main(int argc, char **argv){
         database_message_connection = new DatabaseMessageConnection(
             hand_shake_listen_port_no);
         printf("awaiting tool chain hand shake to say database is ready \n");
-        //packet_file_path = database_message_connection->recieve_notification();
+        packet_file_path = database_message_connection->recieve_notification();
         printf("received tool chain hand shake to say database is ready \n");
     }
 
