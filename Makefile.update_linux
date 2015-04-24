@@ -12,12 +12,12 @@ OBJECTS = utilities/ColourReader.o \
    
 OBJS=$(OBJECTS:%=build/%)
 
-vis.exe: $(OBJS)
-	g++ -o $@ $^ -fno-use-linker-plugin -lfreeglut_static -lopengl32 -lwinmm -lgdi32 -lglu32 -lpthread -lws2_32 -lsqlite3
+vis: $(OBJS)
+	g++ -o $@ $^ -lGL -lGLU -lglut -lSOIL -lm -lpthread -lsqlite3
 
 build/%.o: %.cpp
 	-mkdir -p $(dir $@)
-	g++ -D FREEGLUT_STATIC -D WINVER=0x501 -D WIN32_LEAN_AND_MEAN -fpermissive -o $@ -c $<
+	g++ -o $@ -c $<
 
 clean:
-	rm -rf build vis.exe
+	rm -rf build vis

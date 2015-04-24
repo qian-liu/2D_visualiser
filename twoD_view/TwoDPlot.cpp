@@ -16,13 +16,13 @@
 
 
 
-#include "boost/date_time/posix_time/posix_time.hpp" //include all types plus i/o
+//#include "boost/date_time/posix_time/posix_time.hpp" //include all types plus i/o
 //#include <boost/date_time/posix_time/posix_time.hpp>
 
 using namespace glutFramework;
 using namespace std;
 
-std::string now_str()
+/*std::string now_str()
 {
     // Get current time from the clock, using microseconds resolution
     const boost::posix_time::ptime now = 
@@ -63,7 +63,7 @@ std::string now_str()
         hours, minutes, seconds, milliseconds);
 
     return buf;
-}
+}*/
 
 TwoDPlot::TwoDPlot(int argc, char **argv, char *remote_host,
                     std::set<int> *ports,
